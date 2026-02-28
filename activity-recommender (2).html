@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>✨ Personal Activity Recommender ✨</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f5f1e8;
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #1a1a1a;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      animation: slideUp 0.6s ease-out;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffd966;
+      color: #1a1a1a;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 0.85em;
+      font-weight: 600;
+      margin-bottom: 30px;
+      border: 3px solid #1a1a1a;
+    }
+    
+    h1 {
+      font-size: 4em;
+      font-weight: 800;
+      margin-bottom: 15px;
+      color: #1a1a1a;
+      line-height: 1.1;
+    }
+    
+    .subtitle {
+      font-size: 1.2em;
+      color: #666;
+      margin-bottom: 60px;
+      font-weight: 400;
+    }
+    
+    .questions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    
+    .question-group {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      border: 3px solid #1a1a1a;
+      box-shadow: 4px 4px 0 #1a1a1a;
+      transition: all 0.2s ease;
+    }
+    
+    .question-group:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0 #1a1a1a;
+    }
+    
+    .question-group.full-width {
+      grid-column: 1 / -1;
+    }
+    
+    label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      font-size: 0.9em;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .emoji {
+      font-size: 1.2em;
+    }
+    
+    .options-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .option-btn {
+      flex: 1;
+      min-width: fit-content;
+      padding: 14px 24px;
+      border: 3px solid #e0e0e0;
+      background: white;
+      border-radius: 50px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #666;
+    }
+    
+    .option-btn:hover {
+      border-color: #1a1a1a;
+      transform: translateY(-2px);
+    }
+    
+    .option-btn.selected {
+      background: #ff6b6b;
+      border-color: #ff6b6b;
+      color: white;
+    }
+    
+    .option-btn.selected.energy-low,
+    .option-btn.selected.clarity-foggy,
+    .option-btn.selected.stimulation-quiet,
+    .option-btn.selected.effort-low {
+      background: #ff6b6b;
+      border-color: #ff6b6b;
+    }
+    
+    .option-btn.selected.energy-medium,
+    .option-btn.selected.effort-moderate {
+      background: #ff6b6b;
+      border-color: #ff6b6b;
+    }
+    
+    .option-btn.selected.energy-high,
+    .option-btn.selected.effort-high {
+      background: #ff6b6b;
+      border-color: #ff6b6b;
+    }
+    
+    .option-btn.selected.clarity-neutral,
+    .option-btn.selected.stimulation-light {
+      background: #ffd966;
+      border-color: #ffd966;
+      color: #1a1a1a;
+    }
+    
+    .option-btn.selected.clarity-sharp {
+      background: #ffd966;
+      border-color: #ffd966;
+      color: #1a1a1a;
+    }
+    
+    .option-btn.selected.stimulation-deep {
+      background: #4a90e2;
+      border-color: #4a90e2;
+    }
+    
+    .option-btn.selected.location-outside {
+      background: #5cb85c;
+      border-color: #5cb85c;
+    }
+    
+    .option-btn.selected.location-inside {
+      background: #f0f0f0;
+      border-color: #f0f0f0;
+      color: #1a1a1a;
+    }
+    
+    .option-btn.selected.location-either {
+      background: #e0e0e0;
+      border-color: #e0e0e0;
+      color: #1a1a1a;
+    }
+    
+    select {
+      display: none;
+    }
+    
+    .button-container {
+      display: flex;
+      gap: 15px;
+      margin-top: 40px;
+      justify-content: center;
+    }
+    
+    button {
+      background: #1a1a1a;
+      color: white;
+      border: 3px solid #1a1a1a;
+      padding: 18px 40px;
+      font-size: 1.1em;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s ease;
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);
+    }
+    
+    button:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.15);
+    }
+    
+    button:active {
+      transform: translate(0, 0);
+      box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+    }
+    
+    button:disabled {
+      background: #ccc;
+      border-color: #ccc;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    
+    button::before {
+      display: none;
+    }
+    
+    .reset-button {
+      background: white;
+      color: #1a1a1a;
+      border-color: #1a1a1a;
+      margin-left: 0;
+      padding: 18px 40px;
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);
+    }
+    
+    .reset-button:hover {
+      box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.15);
+    }
+    
+    #validation-message {
+      text-align: center;
+      color: #dc3545;
+      font-weight: 600;
+      margin-top: 20px;
+      padding: 15px 20px;
+      background: #ffe6e6;
+      border-radius: 15px;
+      border: 3px solid #ff6b6b;
+      display: none;
+      animation: shake 0.5s;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+    
+    #output {
+      margin-top: 60px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.5s ease;
+    }
+    
+    #output.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .results-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+    
+    .results-header h2 {
+      font-size: 2em;
+      font-weight: 800;
+      color: #1a1a1a;
+    }
+    
+    .state-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+    
+    .state-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f0f0f0;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      font-weight: 600;
+      color: #666;
+    }
+    
+    .activities-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .activity-card {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      border: 3px solid #1a1a1a;
+      box-shadow: 4px 4px 0 #1a1a1a;
+      transition: all 0.2s ease;
+      animation: fadeInUp 0.5s ease-out forwards;
+      opacity: 0;
+    }
+    
+    .activity-card:nth-child(1) {
+      animation-delay: 0.1s;
+      border-color: #ff9a62;
+      box-shadow: 4px 4px 0 #ff9a62;
+    }
+    
+    .activity-card:nth-child(2) {
+      animation-delay: 0.2s;
+      border-color: #ffd966;
+      box-shadow: 4px 4px 0 #ffd966;
+    }
+    
+    .activity-card:nth-child(3) {
+      animation-delay: 0.3s;
+      border-color: #a8d5ff;
+      box-shadow: 4px 4px 0 #a8d5ff;
+    }
+    
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .activity-card {
+      transform: translateY(20px);
+    }
+    
+    .activity-card:hover {
+      transform: translate(-2px, -2px);
+    }
+    
+    .activity-card:nth-child(1):hover {
+      box-shadow: 6px 6px 0 #ff9a62;
+    }
+    
+    .activity-card:nth-child(2):hover {
+      box-shadow: 6px 6px 0 #ffd966;
+    }
+    
+    .activity-card:nth-child(3):hover {
+      box-shadow: 6px 6px 0 #a8d5ff;
+    }
+    
+    .activity-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      margin-bottom: 15px;
+    }
+    
+    .activity-icon {
+      width: 70px;
+      height: 70px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5em;
+      flex-shrink: 0;
+    }
+    
+    .activity-card:nth-child(1) .activity-icon {
+      background: #fff0e5;
+    }
+    
+    .activity-card:nth-child(2) .activity-icon {
+      background: #fff9e5;
+    }
+    
+    .activity-card:nth-child(3) .activity-icon {
+      background: #e5f3ff;
+    }
+    
+    .activity-content {
+      flex: 1;
+    }
+    
+    .activity-category {
+      display: inline-block;
+      background: #f0ad8e;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.75em;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+    
+    .activity-card:nth-child(2) .activity-category {
+      background: #f0ad8e;
+    }
+    
+    .activity-card:nth-child(3) .activity-category {
+      background: #5cb3ff;
+    }
+    
+    .activity-rank {
+      display: none;
+    }
+    
+    .activity-title {
+      font-size: 1.5em;
+      font-weight: 800;
+      color: #1a1a1a;
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+    
+    .activity-score {
+      display: none;
+    }
+    
+    .activity-reason {
+      color: #888;
+      line-height: 1.7;
+      margin-bottom: 20px;
+      font-size: 1em;
+    }
+    
+    .match-score {
+      margin-top: 20px;
+    }
+    
+    .match-bar-container {
+      width: 100%;
+      height: 12px;
+      background: #f0f0f0;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+      position: relative;
+    }
+    
+    .match-bar {
+      height: 100%;
+      background: #ff9a62;
+      border-radius: 10px;
+      transition: width 1s ease-out;
+      width: 0;
+    }
+    
+    .activity-card:nth-child(1) .match-bar {
+      background: #ff9a62;
+    }
+    
+    .activity-card:nth-child(2) .match-bar {
+      background: #ff9a62;
+    }
+    
+    .activity-card:nth-child(3) .match-bar {
+      background: #ff9a62;
+    }
+    
+    .match-percentage {
+      position: absolute;
+      right: 10px;
+      top: -25px;
+      font-weight: 700;
+      font-size: 1.1em;
+      color: #1a1a1a;
+    }
+    
+    .activity-tags {
+      display: none;
+    }
+    
+    .tag {
+      display: none;
+    }
+    
+    .no-results {
+      text-align: center;
+      padding: 60px 40px;
+      color: #888;
+      font-size: 1.2em;
+      background: white;
+      border-radius: 20px;
+      border: 3px solid #e0e0e0;
+    }
+    
+    .emoji {
+      font-size: 1.5em;
+      margin-right: 8px;
+    }
+    
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2.5em;
+      }
+      
+      .questions-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .question-group {
+        padding: 20px;
+      }
+      
+      .button-container {
+        flex-direction: column;
+      }
+      
+      button, .reset-button {
+        width: 100%;
+      }
+      
+      .activity-header {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .activity-icon {
+        margin: 0 auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="badge">
+      <span>✨</span>
+      <span>ACTIVITY FINDER</span>
+    </div>
+    
+    <h1>What should I do right now?</h1>
+    <p class="subtitle">Tell us how you're feeling, and we'll suggest the perfect activity to match your vibe.</p>
+    
+    <div class="questions-grid">
+      <div class="question-group" id="energy-group">
+        <label for="energy"><span class="emoji">⚡</span>Energy level</label>
+        <div class="options-container" id="energy-options">
+          <button type="button" class="option-btn" data-field="energy" data-value="low">
+            <span>😴</span> Low
+          </button>
+          <button type="button" class="option-btn" data-field="energy" data-value="medium">
+            <span>⚡</span> Medium
+          </button>
+          <button type="button" class="option-btn" data-field="energy" data-value="high">
+            <span>🔥</span> High
+          </button>
+        </div>
+        <select id="energy" style="display: none;">
+          <option value="">Choose your energy...</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>  
+          <option value="high">High</option>
+        </select>
+      </div>
+     
+      <div class="question-group" id="clarity-group">
+        <label for="clarity"><span class="emoji">🧠</span>Mental clarity</label>
+        <div class="options-container" id="clarity-options">
+          <button type="button" class="option-btn" data-field="clarity" data-value="foggy">
+            <span>🌫️</span> Foggy
+          </button>
+          <button type="button" class="option-btn" data-field="clarity" data-value="neutral">
+            <span>😐</span> Neutral
+          </button>
+          <button type="button" class="option-btn" data-field="clarity" data-value="sharp">
+            <span>🧠</span> Sharp
+          </button>
+        </div>
+        <select id="clarity" style="display: none;">
+          <option value="">Choose your mental state...</option>
+          <option value="foggy">Foggy</option>
+          <option value="neutral">Neutral</option>
+          <option value="sharp">Sharp</option>  
+        </select>
+      </div>
+     
+      <div class="question-group full-width" id="stimulation-group">
+        <label for="stimulation"><span class="emoji">🎯</span>I want...</label>
+        <div class="options-container" id="stimulation-options">
+          <button type="button" class="option-btn" data-field="stimulation" data-value="quiet">
+            <span>🤫</span> Quiet Solo
+          </button>
+          <button type="button" class="option-btn" data-field="stimulation" data-value="light">
+            <span>✨</span> Light
+          </button>
+          <button type="button" class="option-btn" data-field="stimulation" data-value="deep">
+            <span>🧠</span> Deep Focus
+          </button>
+          <button type="button" class="option-btn" data-field="stimulation" data-value="social">
+            <span>👥</span> Social Energy
+          </button>
+        </div>
+        <select id="stimulation" style="display: none;">
+          <option value="">Choose your vibe...</option>
+          <option value="quiet">Quiet solo time</option>
+          <option value="light">Light, easy stimulation</option>
+          <option value="deep">Deep focus session</option>
+          <option value="social">Social energy</option>
+        </select>
+      </div>
+     
+      <div class="question-group" id="location-group">
+        <label for="location"><span class="emoji">🌍</span>Location</label>
+        <div class="options-container" id="location-options">
+          <button type="button" class="option-btn" data-field="location" data-value="inside">
+            <span>🏠</span> Inside
+          </button>
+          <button type="button" class="option-btn" data-field="location" data-value="outside">
+            <span>🌳</span> Outside
+          </button>
+        </div>
+        <select id="location" style="display: none;">
+          <option value="">Choose location...</option>
+          <option value="inside">Inside</option>
+          <option value="outside">Outside</option>
+          <option value="either">Either</option>
+        </select>
+      </div>
+     
+      <div class="question-group" id="effort-group">
+        <label for="effort"><span class="emoji">💪</span>Effort level</label>  
+        <div class="options-container" id="effort-options">
+          <button type="button" class="option-btn" data-field="effort" data-value="low">
+            <span>🛋️</span> Chill
+          </button>
+          <button type="button" class="option-btn" data-field="effort" data-value="moderate">
+            <span>🚶</span> Moderate
+          </button>
+          <button type="button" class="option-btn" data-field="effort" data-value="high">
+            <span>💪</span> Intense
+          </button>
+        </div>
+        <select id="effort" style="display: none;">
+          <option value="">Choose effort level...</option>
+          <option value="low">Low</option>
+          <option value="moderate">Moderate</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+    </div>
+     
+    <div class="button-container">
+      <button onclick="recommend()">Get Recommendations ✨</button>
+      <button class="reset-button" onclick="resetForm()">Start Over 🔄</button>
+    </div>
+    
+    <div id="validation-message"></div>
+     
+    <div id="output"></div>
+  </div>
+   
+  <script>
+    // Comprehensive activity database with scoring attributes and icons
+    const activities = [
+      // Creative activities
+      {
+        name: 'Paint or draw something',
+        icon: '🎨',
+        category: 'creative',
+        energyMatch: { low: 2, medium: 3, high: 2 },
+        clarityMatch: { foggy: 3, neutral: 3, sharp: 2 },
+        stimulationMatch: { quiet: 3, light: 3, deep: 2, social: 0 },
+        locationMatch: { inside: 3, outside: 2, either: 3 },
+        effortMatch: { low: 2, moderate: 3, high: 1 },
+        tags: ['therapeutic', 'expressive', 'low-pressure']
+      },
+      {
+        name: 'Sketch or doodle',
+        icon: '✏️',
+        category: 'creative',
+        energyMatch: { low: 3, medium: 3, high: 1 },
+        clarityMatch: { foggy: 3, neutral: 3, sharp: 2 },
+        stimulationMatch: { quiet: 3, light: 2, deep: 1, social: 0 },
+        locationMatch: { inside: 3, outside: 3, either: 3 },
+        effortMatch: { low: 3, moderate: 2, high: 0 },
+        tags: ['portable', 'meditative', 'flexible']
+      },
+      {
+        name: 'Reorganize creative supplies',
+        icon: '📦',
+        category: 'creative',
+        energyMatch: { low: 1, medium: 3, high: 2 },
+        clarityMatch: { foggy: 2, neutral: 3, sharp: 2 },
+        stimulationMatch: { quiet: 2, light: 3, deep: 1, social: 0 },
+        locationMatch: { inside: 3, outside: 0, either: 2 },
+        effortMatch: { low: 2, moderate: 3, high: 1 },
+        tags: ['organizing', 'satisfying', 'productive']
+      },
+      {
+        name: 'Listen to music intentionally',
+        icon: '🎵',
+        category: 'creative',
+        energyMatch: { low: 3, medium: 3, high: 2 },
+        clarityMatch: { foggy: 3, neutral: 3, sharp: 2 },
+        stimulationMatch: { quiet: 3, light: 2, deep: 2, social: 0 },
+        locationMatch: { inside: 3, outside: 2, either: 3 },
+        effortMatch: { low: 3, moderate: 2, high: 1 },
+        tags: ['relaxing', 'emotional', 'passive']
+      },
+      {
+        name: 'Curate a playlist for a specific mood',
+        icon: '🎧',
+        category: 'creative',
+        energyMatch: { low: 2, medium: 3, high: 2 },
+        clarityMatch: { foggy: 2, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 2, light: 3, deep: 2, social: 1 },
+        locationMatch: { inside: 3, outside: 1, either: 3 },
+        effortMatch: { low: 2, moderate: 3, high: 1 },
+        tags: ['curating', 'creative', 'shareable']
+      },
+      {
+        name: 'Write poetry or stream of consciousness',
+        icon: '✍️',
+        category: 'creative',
+        energyMatch: { low: 2, medium: 3, high: 2 },
+        clarityMatch: { foggy: 3, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 3, light: 2, deep: 3, social: 0 },
+        locationMatch: { inside: 3, outside: 3, either: 3 },
+        effortMatch: { low: 2, moderate: 3, high: 2 },
+        tags: ['expressive', 'introspective', 'therapeutic']
+      },
+      {
+        name: 'Try a new recipe or bake something',
+        icon: '🍪',
+        category: 'creative',
+        energyMatch: { low: 1, medium: 3, high: 3 },
+        clarityMatch: { foggy: 1, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 1, light: 3, deep: 2, social: 2 },
+        locationMatch: { inside: 3, outside: 0, either: 2 },
+        effortMatch: { low: 1, moderate: 3, high: 2 },
+        tags: ['sensory', 'rewarding', 'creative']
+      },
+      
+      // Movement activities
+      {
+        name: 'Take a 30-minute walk outside',
+        icon: '🚶',
+        category: 'movement',
+        energyMatch: { low: 2, medium: 3, high: 3 },
+        clarityMatch: { foggy: 3, neutral: 3, sharp: 2 },
+        stimulationMatch: { quiet: 3, light: 3, deep: 1, social: 1 },
+        locationMatch: { inside: 0, outside: 3, either: 2 },
+        effortMatch: { low: 2, moderate: 3, high: 2 },
+        tags: ['nature', 'meditative', 'refreshing']
+      },
+      {
+        name: 'Light stretching or yoga',
+        icon: '🧘',
+        category: 'movement',
+        energyMatch: { low: 3, medium: 3, high: 1 },
+        clarityMatch: { foggy: 3, neutral: 3, sharp: 2 },
+        stimulationMatch: { quiet: 3, light: 2, deep: 2, social: 0 },
+        locationMatch: { inside: 3, outside: 2, either: 3 },
+        effortMatch: { low: 3, moderate: 2, high: 0 },
+        tags: ['gentle', 'mindful', 'restorative']
+      },
+      {
+        name: 'High-intensity workout or run',
+        icon: '🏃',
+        category: 'movement',
+        energyMatch: { low: 0, medium: 2, high: 3 },
+        clarityMatch: { foggy: 2, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 1, light: 1, deep: 2, social: 1 },
+        locationMatch: { inside: 2, outside: 3, either: 3 },
+        effortMatch: { low: 0, moderate: 1, high: 3 },
+        tags: ['energizing', 'challenging', 'endorphins']
+      },
+      {
+        name: 'Long solo walk with podcast',
+        icon: '🎧',
+        category: 'movement',
+        energyMatch: { low: 2, medium: 3, high: 2 },
+        clarityMatch: { foggy: 2, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 2, light: 3, deep: 2, social: 0 },
+        locationMatch: { inside: 0, outside: 3, either: 2 },
+        effortMatch: { low: 2, moderate: 3, high: 1 },
+        tags: ['learning', 'movement', 'solo']
+      },
+      {
+        name: 'Dance to your favorite songs',
+        icon: '💃',
+        category: 'movement',
+        energyMatch: { low: 1, medium: 3, high: 3 },
+        clarityMatch: { foggy: 3, neutral: 3, sharp: 1 },
+        stimulationMatch: { quiet: 0, light: 3, deep: 0, social: 2 },
+        locationMatch: { inside: 3, outside: 1, either: 3 },
+        effortMatch: { low: 1, moderate: 3, high: 2 },
+        tags: ['fun', 'expressive', 'mood-boosting']
+      },
+      {
+        name: 'Bike ride around the neighborhood',
+        icon: '🚴',
+        category: 'movement',
+        energyMatch: { low: 1, medium: 3, high: 3 },
+        clarityMatch: { foggy: 2, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 2, light: 3, deep: 1, social: 1 },
+        locationMatch: { inside: 0, outside: 3, either: 2 },
+        effortMatch: { low: 1, moderate: 3, high: 2 },
+        tags: ['adventure', 'freedom', 'active']
+      },
+      
+      // Productive activities
+      {
+        name: 'Clean or organize your space',
+        icon: '🧹',
+        category: 'productive',
+        energyMatch: { low: 1, medium: 3, high: 3 },
+        clarityMatch: { foggy: 2, neutral: 3, sharp: 2 },
+        stimulationMatch: { quiet: 2, light: 3, deep: 1, social: 0 },
+        locationMatch: { inside: 3, outside: 0, either: 2 },
+        effortMatch: { low: 1, moderate: 3, high: 2 },
+        tags: ['satisfying', 'practical', 'reset']
+      },
+      {
+        name: 'Tackle one small nagging task',
+        icon: '✅',
+        category: 'productive',
+        energyMatch: { low: 2, medium: 3, high: 2 },
+        clarityMatch: { foggy: 1, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 2, light: 2, deep: 3, social: 0 },
+        locationMatch: { inside: 3, outside: 1, either: 3 },
+        effortMatch: { low: 1, moderate: 3, high: 1 },
+        tags: ['accomplishment', 'quick-win', 'focused']
+      },
+      {
+        name: 'Meal prep for the week',
+        icon: '🥗',
+        category: 'productive',
+        energyMatch: { low: 1, medium: 3, high: 3 },
+        clarityMatch: { foggy: 1, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 1, light: 3, deep: 2, social: 0 },
+        locationMatch: { inside: 3, outside: 0, either: 2 },
+        effortMatch: { low: 0, moderate: 2, high: 3 },
+        tags: ['self-care', 'planning', 'rewarding']
+      },
+      
+      // Learning activities
+      {
+        name: 'Take an online course or tutorial',
+        icon: '💻',
+        category: 'learning',
+        energyMatch: { low: 1, medium: 3, high: 2 },
+        clarityMatch: { foggy: 0, neutral: 2, sharp: 3 },
+        stimulationMatch: { quiet: 2, light: 2, deep: 3, social: 0 },
+        locationMatch: { inside: 3, outside: 0, either: 2 },
+        effortMatch: { low: 1, moderate: 3, high: 2 },
+        tags: ['growth', 'structured', 'skill-building']
+      },
+      {
+        name: 'Practice Portuguese',
+        icon: '🇧🇷',
+        category: 'learning',
+        energyMatch: { low: 1, medium: 3, high: 2 },
+        clarityMatch: { foggy: 1, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 2, light: 2, deep: 3, social: 1 },
+        locationMatch: { inside: 3, outside: 2, either: 3 },
+        effortMatch: { low: 2, moderate: 3, high: 2 },
+        tags: ['language', 'progress', 'focused']
+      },
+      {
+        name: 'Practice Mandarin',
+        icon: '🇨🇳',
+        category: 'learning',
+        energyMatch: { low: 1, medium: 3, high: 2 },
+        clarityMatch: { foggy: 1, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 2, light: 2, deep: 3, social: 1 },
+        locationMatch: { inside: 3, outside: 2, either: 3 },
+        effortMatch: { low: 2, moderate: 3, high: 2 },
+        tags: ['language', 'challenging', 'rewarding']
+      },
+      {
+        name: 'Read a book (fiction or non-fiction)',
+        icon: '📖',
+        category: 'learning',
+        energyMatch: { low: 3, medium: 3, high: 1 },
+        clarityMatch: { foggy: 2, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 3, light: 2, deep: 3, social: 0 },
+        locationMatch: { inside: 3, outside: 3, either: 3 },
+        effortMatch: { low: 3, moderate: 2, high: 1 },
+        tags: ['immersive', 'relaxing', 'enriching']
+      },
+      {
+        name: 'Research a topic you\'re curious about',
+        icon: '🔍',
+        category: 'learning',
+        energyMatch: { low: 2, medium: 3, high: 3 },
+        clarityMatch: { foggy: 1, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 2, light: 2, deep: 3, social: 0 },
+        locationMatch: { inside: 3, outside: 1, either: 3 },
+        effortMatch: { low: 2, moderate: 3, high: 2 },
+        tags: ['discovery', 'curiosity-driven', 'engaging']
+      },
+      {
+        name: 'Watch an educational documentary',
+        icon: '🎬',
+        category: 'learning',
+        energyMatch: { low: 3, medium: 3, high: 1 },
+        clarityMatch: { foggy: 2, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 2, light: 3, deep: 2, social: 0 },
+        locationMatch: { inside: 3, outside: 0, either: 2 },
+        effortMatch: { low: 3, moderate: 2, high: 0 },
+        tags: ['passive-learning', 'visual', 'interesting']
+      },
+      
+      // Reset/Self-care activities
+      {
+        name: 'Take a long shower with music',
+        icon: '🚿',
+        category: 'reset',
+        energyMatch: { low: 3, medium: 2, high: 1 },
+        clarityMatch: { foggy: 3, neutral: 3, sharp: 1 },
+        stimulationMatch: { quiet: 3, light: 2, deep: 0, social: 0 },
+        locationMatch: { inside: 3, outside: 0, either: 2 },
+        effortMatch: { low: 3, moderate: 1, high: 0 },
+        tags: ['cleansing', 'sensory', 'rejuvenating']
+      },
+      {
+        name: 'Complete skincare routine mindfully',
+        icon: '🧴',
+        category: 'reset',
+        energyMatch: { low: 3, medium: 2, high: 1 },
+        clarityMatch: { foggy: 3, neutral: 3, sharp: 1 },
+        stimulationMatch: { quiet: 3, light: 2, deep: 1, social: 0 },
+        locationMatch: { inside: 3, outside: 0, either: 2 },
+        effortMatch: { low: 3, moderate: 2, high: 0 },
+        tags: ['self-care', 'ritual', 'calming']
+      },
+      {
+        name: 'Journal about your day or feelings',
+        icon: '📔',
+        category: 'reset',
+        energyMatch: { low: 3, medium: 3, high: 2 },
+        clarityMatch: { foggy: 3, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 3, light: 2, deep: 2, social: 0 },
+        locationMatch: { inside: 3, outside: 2, either: 3 },
+        effortMatch: { low: 2, moderate: 3, high: 1 },
+        tags: ['reflection', 'processing', 'therapeutic']
+      },
+      {
+        name: 'Sit outside with tea or coffee',
+        icon: '☕',
+        category: 'reset',
+        energyMatch: { low: 3, medium: 3, high: 1 },
+        clarityMatch: { foggy: 3, neutral: 3, sharp: 2 },
+        stimulationMatch: { quiet: 3, light: 2, deep: 1, social: 0 },
+        locationMatch: { inside: 0, outside: 3, either: 2 },
+        effortMatch: { low: 3, moderate: 1, high: 0 },
+        tags: ['peaceful', 'present', 'simple']
+      },
+      {
+        name: 'Watch a comfort show or movie',
+        icon: '📺',
+        category: 'reset',
+        energyMatch: { low: 3, medium: 2, high: 0 },
+        clarityMatch: { foggy: 3, neutral: 3, sharp: 1 },
+        stimulationMatch: { quiet: 2, light: 3, deep: 0, social: 0 },
+        locationMatch: { inside: 3, outside: 0, either: 2 },
+        effortMatch: { low: 3, moderate: 1, high: 0 },
+        tags: ['cozy', 'familiar', 'easy']
+      },
+      {
+        name: 'Take a power nap (20-30 min)',
+        icon: '😴',
+        category: 'reset',
+        energyMatch: { low: 3, medium: 1, high: 0 },
+        clarityMatch: { foggy: 3, neutral: 2, sharp: 0 },
+        stimulationMatch: { quiet: 3, light: 0, deep: 0, social: 0 },
+        locationMatch: { inside: 3, outside: 1, either: 2 },
+        effortMatch: { low: 3, moderate: 0, high: 0 },
+        tags: ['restorative', 'recharge', 'brief']
+      },
+      {
+        name: 'Do a guided meditation',
+        icon: '🧘',
+        category: 'reset',
+        energyMatch: { low: 3, medium: 3, high: 1 },
+        clarityMatch: { foggy: 3, neutral: 3, sharp: 2 },
+        stimulationMatch: { quiet: 3, light: 1, deep: 2, social: 0 },
+        locationMatch: { inside: 3, outside: 2, either: 3 },
+        effortMatch: { low: 3, moderate: 2, high: 0 },
+        tags: ['mindfulness', 'centering', 'peaceful']
+      },
+      
+      // Social activities
+      {
+        name: 'Call or video chat a friend',
+        icon: '📞',
+        category: 'social',
+        energyMatch: { low: 1, medium: 3, high: 3 },
+        clarityMatch: { foggy: 2, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 0, light: 2, deep: 1, social: 3 },
+        locationMatch: { inside: 3, outside: 2, either: 3 },
+        effortMatch: { low: 2, moderate: 3, high: 1 },
+        tags: ['connection', 'conversation', 'supportive']
+      },
+      {
+        name: 'Go to a coffee shop to work/read',
+        icon: '☕',
+        category: 'social',
+        energyMatch: { low: 1, medium: 3, high: 2 },
+        clarityMatch: { foggy: 2, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 1, light: 3, deep: 2, social: 2 },
+        locationMatch: { inside: 2, outside: 1, either: 3 },
+        effortMatch: { low: 2, moderate: 3, high: 1 },
+        tags: ['ambient-social', 'productive', 'change-of-scene']
+      },
+      {
+        name: 'Attend a class or group activity',
+        icon: '🏋️',
+        category: 'social',
+        energyMatch: { low: 0, medium: 2, high: 3 },
+        clarityMatch: { foggy: 1, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 0, light: 2, deep: 2, social: 3 },
+        locationMatch: { inside: 2, outside: 2, either: 3 },
+        effortMatch: { low: 0, moderate: 2, high: 3 },
+        tags: ['structured-social', 'new-people', 'engaging']
+      },
+      {
+        name: 'Text friends to catch up',
+        icon: '💬',
+        category: 'social',
+        energyMatch: { low: 3, medium: 3, high: 2 },
+        clarityMatch: { foggy: 2, neutral: 3, sharp: 2 },
+        stimulationMatch: { quiet: 1, light: 3, deep: 1, social: 3 },
+        locationMatch: { inside: 3, outside: 2, either: 3 },
+        effortMatch: { low: 3, moderate: 2, high: 0 },
+        tags: ['low-key', 'connection', 'flexible']
+      },
+      
+      // Exploration activities
+      {
+        name: 'Explore a new neighborhood on foot',
+        icon: '🗺️',
+        category: 'exploration',
+        energyMatch: { low: 1, medium: 3, high: 3 },
+        clarityMatch: { foggy: 2, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 2, light: 3, deep: 2, social: 1 },
+        locationMatch: { inside: 0, outside: 3, either: 2 },
+        effortMatch: { low: 1, moderate: 3, high: 2 },
+        tags: ['adventure', 'discovery', 'urban']
+      },
+      {
+        name: 'Visit a museum or gallery',
+        icon: '🖼️',
+        category: 'exploration',
+        energyMatch: { low: 2, medium: 3, high: 2 },
+        clarityMatch: { foggy: 2, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 2, light: 3, deep: 3, social: 1 },
+        locationMatch: { inside: 3, outside: 0, either: 2 },
+        effortMatch: { low: 2, moderate: 3, high: 1 },
+        tags: ['cultural', 'inspiring', 'contemplative']
+      },
+      {
+        name: 'Browse a bookstore or library',
+        icon: '📚',
+        category: 'exploration',
+        energyMatch: { low: 2, medium: 3, high: 2 },
+        clarityMatch: { foggy: 2, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 3, light: 3, deep: 2, social: 1 },
+        locationMatch: { inside: 3, outside: 0, either: 2 },
+        effortMatch: { low: 3, moderate: 2, high: 0 },
+        tags: ['discovery', 'quiet', 'browsing']
+      },
+      {
+        name: 'Try a new cafe or restaurant',
+        icon: '🍽️',
+        category: 'exploration',
+        energyMatch: { low: 1, medium: 3, high: 3 },
+        clarityMatch: { foggy: 2, neutral: 3, sharp: 2 },
+        stimulationMatch: { quiet: 1, light: 3, deep: 1, social: 2 },
+        locationMatch: { inside: 2, outside: 2, either: 3 },
+        effortMatch: { low: 2, moderate: 3, high: 1 },
+        tags: ['treat', 'new-experience', 'sensory']
+      },
+      
+      // Play/Fun activities
+      {
+        name: 'Play a video game',
+        icon: '🎮',
+        category: 'play',
+        energyMatch: { low: 2, medium: 3, high: 3 },
+        clarityMatch: { foggy: 3, neutral: 3, sharp: 2 },
+        stimulationMatch: { quiet: 1, light: 3, deep: 2, social: 1 },
+        locationMatch: { inside: 3, outside: 0, either: 2 },
+        effortMatch: { low: 2, moderate: 3, high: 2 },
+        tags: ['engaging', 'fun', 'immersive']
+      },
+      {
+        name: 'Do a puzzle or brain teaser',
+        icon: '🧩',
+        category: 'play',
+        energyMatch: { low: 2, medium: 3, high: 2 },
+        clarityMatch: { foggy: 1, neutral: 3, sharp: 3 },
+        stimulationMatch: { quiet: 3, light: 2, deep: 3, social: 0 },
+        locationMatch: { inside: 3, outside: 2, either: 3 },
+        effortMatch: { low: 2, moderate: 3, high: 1 },
+        tags: ['satisfying', 'focus', 'problem-solving']
+      },
+      {
+        name: 'Browse social media mindfully',
+        icon: '📱',
+        category: 'play',
+        energyMatch: { low: 3, medium: 2, high: 1 },
+        clarityMatch: { foggy: 3, neutral: 3, sharp: 1 },
+        stimulationMatch: { quiet: 1, light: 3, deep: 0, social: 2 },
+        locationMatch: { inside: 3, outside: 2, either: 3 },
+        effortMatch: { low: 3, moderate: 1, high: 0 },
+        tags: ['passive', 'light', 'scrolling']
+      },
+      {
+        name: 'Play with a pet',
+        icon: '🐕',
+        category: 'play',
+        energyMatch: { low: 2, medium: 3, high: 3 },
+        clarityMatch: { foggy: 3, neutral: 3, sharp: 2 },
+        stimulationMatch: { quiet: 2, light: 3, deep: 0, social: 2 },
+        locationMatch: { inside: 3, outside: 3, either: 3 },
+        effortMatch: { low: 2, moderate: 3, high: 2 },
+        tags: ['joyful', 'playful', 'bonding']
+      }
+    ];
+    
+    // Icon mapping for categories
+    const categoryIcons = {
+      'creative': '🎨',
+      'movement': '🧘',
+      'productive': '✅',
+      'learning': '📚',
+      'reset': '🌸',
+      'social': '👥',
+      'exploration': '🗺️',
+      'play': '🎮'
+    };
+    
+    // Track which fields have been selected
+    let selectedFields = new Set();
+    const userSelections = {
+      energy: '',
+      clarity: '',
+      stimulation: '',
+      location: '',
+      effort: ''
+    };
+    
+    // Add event listeners to all pill buttons
+    document.querySelectorAll('.option-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const field = this.dataset.field;
+        const value = this.dataset.value;
+        const container = this.parentElement;
+        
+        // Remove selected class from siblings
+        container.querySelectorAll('.option-btn').forEach(b => {
+          b.classList.remove('selected');
+          b.classList.remove(`${field}-${b.dataset.value}`);
+        });
+        
+        // Add selected class to this button
+        this.classList.add('selected');
+        this.classList.add(`${field}-${value}`);
+        
+        // Update hidden select and user selections
+        document.getElementById(field).value = value;
+        userSelections[field] = value;
+        selectedFields.add(field);
+        
+        // Clear validation message
+        document.getElementById('validation-message').style.display = 'none';
+      });
+    });
+    
+    function validateForm() {
+      const requiredFields = ['energy', 'clarity', 'stimulation', 'location', 'effort'];
+      const missing = requiredFields.filter(field => !document.getElementById(field).value);
+      
+      if (missing.length > 0) {
+        const message = document.getElementById('validation-message');
+        message.textContent = '⚠️ Please select an option for all questions before getting recommendations!';
+        message.style.display = 'block';
+        return false;
+      }
+      return true;
+    }
+    
+    function calculateScore(activity, userState) {
+      let score = 0;
+      
+      // Score based on each attribute
+      score += activity.energyMatch[userState.energy] || 0;
+      score += activity.clarityMatch[userState.clarity] || 0;
+      score += activity.stimulationMatch[userState.stimulation] || 0;
+      score += activity.locationMatch[userState.location] || 0;
+      score += activity.effortMatch[userState.effort] || 0;
+      
+      // Detect contradictions and penalize
+      if (userState.energy === 'low' && userState.effort === 'high') {
+        score -= 2; // Penalize high-effort activities when energy is low
+      }
+      if (userState.energy === 'high' && userState.effort === 'low') {
+        score -= 1; // Slight penalty for low-effort when energy is high
+      }
+      if (userState.clarity === 'foggy' && userState.stimulation === 'deep') {
+        score -= 2; // Penalize deep focus when clarity is foggy
+      }
+      
+      return score;
+    }
+    
+    function getReasoningText(activity, userState) {
+      const reasons = [];
+      
+      // Energy reasoning
+      if (activity.energyMatch[userState.energy] >= 3) {
+        const energyTexts = {
+          low: 'requires minimal energy',
+          medium: 'matches your steady energy',
+          high: 'channels your high energy well'
+        };
+        reasons.push(energyTexts[userState.energy]);
+      }
+      
+      // Clarity reasoning
+      if (activity.clarityMatch[userState.clarity] >= 3) {
+        const clarityTexts = {
+          foggy: 'works well when your mind needs a break',
+          neutral: 'fits your current mental state',
+          sharp: 'takes advantage of your mental clarity'
+        };
+        reasons.push(clarityTexts[userState.clarity]);
+      }
+      
+      // Stimulation reasoning
+      if (activity.stimulationMatch[userState.stimulation] >= 3) {
+        const stimTexts = {
+          quiet: 'provides peaceful solo time',
+          light: 'offers gentle, easy stimulation',
+          deep: 'enables deep focus',
+          social: 'brings social connection'
+        };
+        reasons.push(stimTexts[userState.stimulation]);
+      }
+      
+      // Location reasoning
+      if (activity.locationMatch[userState.location] >= 3) {
+        const locationTexts = {
+          inside: 'perfect for cozy indoor vibes',
+          outside: 'gets you into fresh air',
+          either: 'flexible location'
+        };
+        reasons.push(locationTexts[userState.location]);
+      }
+      
+      // Effort reasoning
+      if (activity.effortMatch[userState.effort] >= 3) {
+        const effortTexts = {
+          low: 'requires very little effort',
+          moderate: 'involves a comfortable level of effort',
+          high: 'matches your desire for intensity'
+        };
+        reasons.push(effortTexts[userState.effort]);
+      }
+      
+      // Generic fallback
+      if (reasons.length === 0) {
+        reasons.push('balances your current needs');
+      }
+      
+      return 'This activity ' + reasons.join(', ') + '.';
+    }
+    
+    function recommend() {
+      if (!validateForm()) {
+        return;
+      }
+      
+      const userState = {
+        energy: document.getElementById('energy').value,
+        clarity: document.getElementById('clarity').value,
+        stimulation: document.getElementById('stimulation').value,
+        location: document.getElementById('location').value,
+        effort: document.getElementById('effort').value
+      };
+      
+      // Calculate scores for all activities
+      const scoredActivities = activities.map(activity => ({
+        ...activity,
+        score: calculateScore(activity, userState),
+        reasoning: getReasoningText(activity, userState)
+      }));
+      
+      // Sort by score and get top 3
+      const recommendations = scoredActivities
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3);
+      
+      displayResults(recommendations, userState);
+    }
+    
+    function displayResults(recommendations, userState) {
+      const output = document.getElementById('output');
+      
+      const stateLabels = {
+        energy: { low: 'Low', medium: 'Medium', high: 'High' },
+        clarity: { foggy: 'Foggy', neutral: 'Neutral', sharp: 'Sharp' },
+        stimulation: { quiet: 'Quiet Solo', light: 'Light', deep: 'Deep Focus', social: 'Social Energy' },
+        location: { inside: 'Inside', outside: 'Outside', either: 'Either' },
+        effort: { low: 'Chill', moderate: 'Moderate', high: 'Intense' }
+      };
+      
+      const stateEmojis = {
+        energy: { low: '😴', medium: '😐', high: '🔥' },
+        clarity: { foggy: '🌫️', neutral: '😐', sharp: '🧠' },
+        stimulation: { quiet: '🤫', light: '✨', deep: '🧠', social: '👥' },
+        location: { inside: '🏠', outside: '🌳', either: '🌍' },
+        effort: { low: '🛋️', moderate: '🚶', high: '💪' }
+      };
+      
+      let html = `
+        <div class="results-header">
+          <span style="font-size: 2em;">🎯</span>
+          <h2>Perfect for you right now</h2>
+        </div>
+        <div class="state-summary">
+      `;
+      
+      // Add state pills
+      for (let [key, value] of Object.entries(userState)) {
+        html += `<span class="state-pill">
+          <span>${stateEmojis[key][value]}</span>
+          ${stateLabels[key][value]}
+        </span>`;
+      }
+      
+      html += `</div><div class="activities-container">`;
+      
+      if (recommendations.length === 0) {
+        html += `<div class="no-results">🤔 Hmm, couldn't find a perfect match. Try adjusting your preferences!</div>`;
+      } else {
+        recommendations.forEach((rec, index) => {
+          const matchPercentage = Math.round((rec.score / 15) * 100);
+          const icon = rec.icon || categoryIcons[rec.category] || '✨';
+          
+          html += `
+            <div class="activity-card">
+              <div class="activity-header">
+                <div class="activity-icon">${icon}</div>
+                <div class="activity-content">
+                  <span class="activity-category">${rec.category.toUpperCase()}</span>
+                  <h3 class="activity-title">${rec.name}</h3>
+                  <p class="activity-reason">${rec.reasoning}</p>
+                  <div class="match-score">
+                    <div class="match-bar-container">
+                      <span class="match-percentage">${matchPercentage}%</span>
+                      <div class="match-bar" style="width: 0%" data-width="${matchPercentage}%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      }
+      
+      html += `</div>`;
+      
+      output.innerHTML = html;
+      output.classList.add('show');
+      
+      // Animate progress bars
+      setTimeout(() => {
+        document.querySelectorAll('.match-bar').forEach(bar => {
+          bar.style.width = bar.dataset.width;
+        });
+      }, 300);
+      
+      // Smooth scroll to results
+      setTimeout(() => {
+        output.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
+    }
+    
+    function resetForm() {
+      // Reset all selects
+      document.querySelectorAll('select').forEach(select => {
+        select.value = '';
+      });
+      
+      // Remove selected class from all pill buttons
+      document.querySelectorAll('.option-btn').forEach(btn => {
+        btn.classList.remove('selected');
+        // Remove all dynamic classes
+        const field = btn.dataset.field;
+        const value = btn.dataset.value;
+        btn.classList.remove(`${field}-${value}`);
+      });
+      
+      // Clear selected fields tracker and user selections
+      selectedFields.clear();
+      Object.keys(userSelections).forEach(key => userSelections[key] = '');
+      
+      // Hide validation message and results
+      document.getElementById('validation-message').style.display = 'none';
+      
+      const output = document.getElementById('output');
+      output.classList.remove('show');
+      setTimeout(() => {
+        output.innerHTML = '';
+      }, 300);
+      
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
